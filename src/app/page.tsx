@@ -10,12 +10,7 @@ export default function HomePage() {
         <p className="text-md text-gray-600 mb-6">
           This is a simple home page with Tailwind CSS.
         </p>
-        <button
-        onClick={() => alert('Clicked!')}
-        className="bg-blue-500 hover:bg-blue-600 text-white font-semibold py-2 px-4 rounded transition"
-      >
-        Click Me
-      </button>
+        
       </div>
     </main>
   );
