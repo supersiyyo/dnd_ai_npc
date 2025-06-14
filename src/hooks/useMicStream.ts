@@ -2,11 +2,11 @@ import { useRef, useEffect } from "react";
 
 export function useMicStream(onAudioChunk: (chunk: Int16Array) => void) {
   const audioContextRef = useRef<AudioContext | null>(null);
-  const processorRef = useRef<ScriptProcessorNode | null>(null);
+  const workletNodeRef = useRef<AudioWorkletNode | null>(null);
   const mediaStreamRef = useRef<MediaStream | null>(null);
 
   useEffect(() => {
-    return () => stopMic(); // Clean up on component unmount
+    return () => stopMic();
   }, []);
 
   const startMic = async () => {
@@ -15,33 +15,33 @@ export function useMicStream(onAudioChunk: (chunk: Int16Array) => void) {
       const AudioCtx = window.AudioContext || (window as any).webkitAudioContext;
       const audioContext = new AudioCtx({ sampleRate: 16000 });
 
-      const source = audioContext.createMediaStreamSource(stream);
-      const processor = audioContext.createScriptProcessor(4096, 1, 1);
+      await audioContext.audioWorklet.addModule("/worklets/recorder-processor.js");
 
-      processor.onaudioprocess = (event) => {
-        const input = event.inputBuffer.getChannelData(0);
-        const int16 = float32ToInt16(input);
+      const source = audioContext.createMediaStreamSource(stream);
+      const recorderNode = new AudioWorkletNode(audioContext, "recorder-processor");
+
+      recorderNode.port.onmessage = (event) => {
+        const floatData = event.data as Float32Array;
+        const int16 = float32ToInt16(floatData);
         onAudioChunk(int16);
       };
 
-      source.connect(processor);
-      processor.connect(audioContext.destination); // Prevents garbage collection
+      source.connect(recorderNode).connect(audioContext.destination);
 
       audioContextRef.current = audioContext;
-      processorRef.current = processor;
+      workletNodeRef.current = recorderNode;
       mediaStreamRef.current = stream;
 
-      console.log("🎙️ Mic started");
-    } catch (error) {
-      console.error("Mic access error:", error);
+      console.log("🎙️ Mic with AudioWorklet started");
+    } catch (err) {
+      console.error("Error starting mic with worklet:", err);
     }
   };
 
   const stopMic = () => {
-    processorRef.current?.disconnect();
+    workletNodeRef.current?.disconnect();
     audioContextRef.current?.close();
     mediaStreamRef.current?.getTracks().forEach((track) => track.stop());
-
     console.log("🛑 Mic stopped");
   };
 
@@ -52,7 +52,7 @@ function float32ToInt16(buffer: Float32Array): Int16Array {
   const len = buffer.length;
   const int16 = new Int16Array(len);
   for (let i = 0; i < len; i++) {
-    int16[i] = Math.max(-1, Math.min(1, buffer[i])) * 0x7FFF;
+    int16[i] = Math.max(-1, Math.min(1, buffer[i])) * 0x7fff;
   }
   return int16;
 }
