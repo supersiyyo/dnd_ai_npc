@@ -1,4 +1,5 @@
 import AudioRecorder from "@/components/AudioRecorder";
+import MicCircleVisualizer from "@/components/MicCircleVisualizer";
 
 export default function TestPage() {
   return (
@@ -8,6 +9,7 @@ export default function TestPage() {
         Click the button below and check the console to see if audio chunks are being logged.
       </p>
       <AudioRecorder />
+      <MicCircleVisualizer />
     </main>
   );
 }

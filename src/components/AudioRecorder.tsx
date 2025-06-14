@@ -6,7 +6,6 @@ import { initRealtimeWebRTC } from "@/lib/webrtc";
 export default function AudioRecorder() {
   const [connected, setConnected] = useState(false);
   const audioRef = useRef<HTMLAudioElement>(null);
-  const [eventLog, setEventLog] = useState<string[]>([]);
 
   const startRealtimeSession = async () => {
     setConnected(true);
@@ -21,7 +20,6 @@ export default function AudioRecorder() {
       // Called when OpenAI sends a data event (e.g., transcriptions, status)
       (event) => {
         console.log("🧠 OpenAI event:", event);
-        setEventLog((prev) => [...prev, JSON.stringify(event)]);
       }
     );
   };
@@ -38,16 +36,6 @@ export default function AudioRecorder() {
 
       {/* Voice output */}
       <audio ref={audioRef} autoPlay />
-
-      {/* Optional: Display AI response logs */}
-      <div className="max-w-md mt-4 p-2 bg-zinc-800 text-white rounded text-sm overflow-y-auto h-48 w-full">
-        <h3 className="font-bold mb-2">📡 AI Event Log</h3>
-        <ul className="space-y-1 list-disc pl-4">
-          {eventLog.map((msg, idx) => (
-            <li key={idx} className="text-xs">{msg}</li>
-          ))}
-        </ul>
-      </div>
     </div>
   );
 }
