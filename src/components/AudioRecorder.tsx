@@ -3,7 +3,7 @@
 import { useRef, useState } from "react";
 import { initRealtimeWebRTC } from "@/lib/webrtc";
 import MicCircleVisualizer from "@/components/MicCircleVisualizer";
-import AiCircleVisualizer from "@/components/AICircleVisualizer";
+import AiCircleVisualizer from "@/components/AiCircleVisualizer";
 
 export default function AudioRecorder() {
   const [connected, setConnected] = useState(false);
