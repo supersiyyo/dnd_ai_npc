@@ -1,29 +1,37 @@
+// components/AudioRecorder.tsx
 'use client';
 
-import { useRef, useState } from "react";
-import { initRealtimeWebRTC } from "@/lib/webrtc";
-import MicCircleVisualizer from "@/components/MicCircleVisualizer";
-import AiCircleVisualizer from "@/components/AiCircleVisualizer";
+import React, { useRef, useState } from 'react';
+import { initRealtimeWebRTC } from '@/lib/webrtc';
 
-export default function AudioRecorder() {
+export interface AudioRecorderProps {
+  /**
+   * Callback fired when AI MediaStream is available
+   */
+  onStream: (stream: MediaStream) => void;
+}
+
+/**
+ * Connects to OpenAI voice via WebRTC and reports the AI audio stream
+ * through the onStream callback.
+ */
+const AudioRecorder: React.FC<AudioRecorderProps> = ({ onStream }) => {
   const [connected, setConnected] = useState(false);
-  const [aiStream, setAiStream] = useState<MediaStream | null>(null);
   const audioRef = useRef<HTMLAudioElement>(null);
 
   const startRealtimeSession = async () => {
     setConnected(true);
-
     const { dc } = await initRealtimeWebRTC(
-      // AI voice stream
+      // AI voice stream callback
       (stream) => {
         if (audioRef.current) {
           audioRef.current.srcObject = stream;
         }
-        setAiStream(stream);
+        onStream(stream);
       },
-      // Data events (we're just logging)
+      // Data event callback (optional logging)
       (event) => {
-        console.log("🧠 OpenAI event:", event);
+        console.log('🧠 OpenAI event:', event);
       }
     );
   };
@@ -32,25 +40,16 @@ export default function AudioRecorder() {
     <div className="flex flex-col items-center gap-6">
       <button
         onClick={startRealtimeSession}
-        className="px-4 py-2 rounded bg-green-600 text-white hover:bg-green-700"
         disabled={connected}
+        className="px-4 py-2 rounded bg-green-600 text-white hover:bg-green-700 disabled:opacity-50"
       >
-        {connected ? "✅ Connected to OpenAI" : "🎤 Start AI Voice Session"}
+        {connected ? '✅ Connected to OpenAI' : '🎤 Start AI Voice Session'}
       </button>
 
-      {/* hidden audio element for playback */}
+      {/* Hidden audio element for playback */}
       <audio ref={audioRef} autoPlay className="hidden" />
-
-      {/* visualizers */}
-      <div className="flex space-x-8">
-        {/* Mic input visual */}
-        <MicCircleVisualizer />
-
-        {/* AI response visual */}
-        {aiStream && (
-          <AiCircleVisualizer stream={aiStream} size={200} />
-        )}
-      </div>
     </div>
   );
-}
+};
+
+export default AudioRecorder;
