@@ -3,15 +3,9 @@
 import React, { useEffect, useRef } from 'react';
 
 export interface TopMicSemiCircleVisualizerProps {
-  /**
-   * MediaStream (e.g. AI voice stream) to visualize
-   */
   stream: MediaStream;
 }
 
-/**
- * Top audio-reactive semicircle that uses a provided MediaStream (AI input).
- */
 const TopMicSemiCircleVisualizer: React.FC<TopMicSemiCircleVisualizerProps> = ({ stream }) => {
   const pathRef = useRef<SVGPathElement>(null);
   const audioCtxRef = useRef<AudioContext | null>(null);

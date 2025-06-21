@@ -3,12 +3,6 @@
 
 import React, { useEffect, useRef } from 'react';
 
-/**
- * An enhanced audio-reactive bottom semicircle with dynamic color and glow effects.
- * - Arc radius pulses with mic input.
- * - Fill hue shifts with amplitude.
- * - Drop-shadow glow intensifies on peaks.
- */
 const MicSemiCircleVisualizer: React.FC = () => {
   const pathRef = useRef<SVGPathElement>(null);
   const audioCtxRef = useRef<AudioContext | null>(null);
